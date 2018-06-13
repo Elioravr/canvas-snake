@@ -24,7 +24,7 @@ const COLORS = {
   [EMPTY_TYPE]: '5B2CF1',
   [SNAKE_TYPE]: '27029D',
   [SNAKE_HEAD_TYPE]: '000',
-  [PIZZA_TYPE]: '1E0279',
+  [PIZZA_TYPE]: 'FFFA5C',
 }
 
 class Snake {
@@ -100,11 +100,17 @@ const currentMatrix = []
 const nextMatrix = []
 const snake = new Snake(START_POSITION_SNAKE)
 let currentSnakePosition = {...START_POSITION_SNAKE}
+const pizzaPosition = {}
 
 let snakeDrawingStarted = false
 let snakeDirection = 'left'
 
+calculatePizzaPoisition = () => {
+  pizzaPosition.x = Math.floor(Math.random() * NUMBER_OF_CELLS_IN_ROW)
+  pizzaPosition.y = Math.floor(Math.random() * NUMBER_OF_CELLS_IN_COLUMN)
+}
 
+calculatePizzaPoisition()
 calculateMatrix = (snakePosition) => {
   const matrix = []
 
@@ -122,10 +128,13 @@ calculateMatrix = (snakePosition) => {
     matrix.push(columnMatrix)
   }
 
-
+  // Add snake to the matrix
   cells.forEach(snakeCell => {
     matrix[snakeCell.y][snakeCell.x].type = SNAKE_TYPE
   })
+
+  // Add the pizza to the matrix
+  matrix[pizzaPosition.y][pizzaPosition.x].type = PIZZA_TYPE
 
   return matrix
 }
