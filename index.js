@@ -40,10 +40,10 @@ calculateMatrix = (snakePosition) => {
   let snakeLeftCells = INITIAL_LENGTH_OF_SNAKE
 
   // Initializing matrix
-  for (let columnIndex = NUMBER_OF_CELLS_IN_COLUMN; columnIndex >= 0; columnIndex--) {
+  for (let columnIndex = 0; columnIndex < NUMBER_OF_CELLS_IN_COLUMN; columnIndex++) {
     const columnMatrix = []
 
-    for (let rowIndex = NUMBER_OF_CELLS_IN_ROW; rowIndex >= 0; rowIndex--) {
+    for (let rowIndex = 0; rowIndex < NUMBER_OF_CELLS_IN_ROW; rowIndex++) {
       if (snakeDrawingStarted && snakeLeftCells > 0 && snakeLeftCells < INITIAL_LENGTH_OF_SNAKE) {
         snakeLeftCells--
         columnMatrix.push({type: SNAKE_TYPE, index: snakeLeftCells})
@@ -67,33 +67,33 @@ calculateNextSnakePosition = () => {
   const snakePosition = {...currentSnakePosition}
   switch (snakeDirection) {
     case LEFT_DIRECTION: {
-      if (snakePosition.x < NUMBER_OF_CELLS_IN_ROW) {
+      if (snakePosition.x > 0) {
         console.log('direction: LEFT_DIRECTION')
-        snakePosition.x++
-      }
-
-      break
-    }
-    case RIGHT_DIRECTION: {
-      if (snakePosition.x < 0) {
-        console.log('direction: RIGHT_DIRECTION')
         snakePosition.x--
       }
 
       break
     }
+    case RIGHT_DIRECTION: {
+      if (snakePosition.x < NUMBER_OF_CELLS_IN_ROW) {
+        console.log('direction: RIGHT_DIRECTION')
+        snakePosition.x++
+      }
+
+      break
+    }
     case TOP_DIRECTION: {
-      if (snakePosition.y < NUMBER_OF_CELLS_IN_COLUMN) {
+      if (snakePosition.y > 0) {
         console.log('direction: TOP_DIRECTION')
-        snakePosition.y++
+        snakePosition.y--
       }
 
       break
     }
     case BOTTOM_DIRECTION: {
-      if (snakePosition.y < 0) {
+      if (snakePosition.y < NUMBER_OF_CELLS_IN_COLUMN) {
         console.log('direction: BOTTOM_DIRECTION')
-        snakePosition.y--
+        snakePosition.y++
       }
 
       break
@@ -105,6 +105,7 @@ calculateNextSnakePosition = () => {
 
 drawMatrix = () => {
   currentSnakePosition = calculateNextSnakePosition()
+
   console.log('index.js currentSnakePosition', currentSnakePosition)
   const currentMatrix = calculateMatrix(currentSnakePosition)
 
@@ -117,6 +118,10 @@ drawMatrix = () => {
         ctx.fillRect(rowIndex * CELL_SIZE, columnIndex * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       })
     })
+  }
+
+  if (currentSnakePosition.x === 0) {
+    return clearInterval(gameInterval)
   }
 }
 
