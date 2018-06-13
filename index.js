@@ -27,86 +27,95 @@ const COLORS = {
   [PIZZA_TYPE]: '1E0279',
 }
 
+class Snake {
+  constructor({x, y}) {
+    this.headPosition = {}
+    this.cells = []
+    this.headPosition = {x, y}
+
+    for (var index = 0; index < INITIAL_LENGTH_OF_SNAKE; index++) {
+      this.cells.push({
+        x: this.headPosition.x + index,
+        y: this.headPosition.y,
+        index
+      })
+    }
+  }
+
+  calculateNewPositionByDirection(direction) {
+    this.cells.forEach(cell => {
+      switch (direction) {
+        case LEFT_DIRECTION: {
+          if (cell.x > 0) {
+            cell.x--
+          }
+
+          break
+        }
+        case RIGHT_DIRECTION: {
+          if (cell.x < NUMBER_OF_CELLS_IN_ROW) {
+            cell.x++
+          }
+
+          break
+        }
+        case TOP_DIRECTION: {
+          if (cell.y > 0) {
+            cell.y--
+          }
+
+          break
+        }
+        case BOTTOM_DIRECTION: {
+          if (cell.y < NUMBER_OF_CELLS_IN_COLUMN) {
+            cell.y++
+          }
+
+          break
+        }
+      }
+    })
+  }
+
+  getCells() { return this.cells }
+}
+
 const canvas = document.getElementById('canvas')
 const currentMatrix = []
 const nextMatrix = []
+const snake = new Snake(START_POSITION_SNAKE)
 let currentSnakePosition = {...START_POSITION_SNAKE}
 
 let snakeDrawingStarted = false
 let snakeDirection = 'left'
 
+
 calculateMatrix = (snakePosition) => {
   const matrix = []
-  let snakeLeftCells = INITIAL_LENGTH_OF_SNAKE
+
+  snake.calculateNewPositionByDirection(snakeDirection)
+  const cells = snake.getCells()
 
   // Initializing matrix
   for (let columnIndex = 0; columnIndex < NUMBER_OF_CELLS_IN_COLUMN; columnIndex++) {
     const columnMatrix = []
 
     for (let rowIndex = 0; rowIndex < NUMBER_OF_CELLS_IN_ROW; rowIndex++) {
-      if (snakeDrawingStarted && snakeLeftCells > 0 && snakeLeftCells < INITIAL_LENGTH_OF_SNAKE) {
-        snakeLeftCells--
-        columnMatrix.push({type: SNAKE_TYPE, index: snakeLeftCells})
-      } else if (columnIndex === snakePosition.y && rowIndex === snakePosition.x) {
-        snakeDrawingStarted = true
-        snakeLeftCells--
-        columnMatrix.push({type: SNAKE_HEAD_TYPE, index: snakeLeftCells})
-      } else {
-        columnMatrix.push({type: EMPTY_TYPE})
-      }
-
+      columnMatrix.push({type: EMPTY_TYPE})
     }
 
     matrix.push(columnMatrix)
   }
 
+
+  cells.forEach(snakeCell => {
+    matrix[snakeCell.y][snakeCell.x].type = SNAKE_TYPE
+  })
+
   return matrix
 }
 
-calculateNextSnakePosition = () => {
-  const snakePosition = {...currentSnakePosition}
-  switch (snakeDirection) {
-    case LEFT_DIRECTION: {
-      if (snakePosition.x > 0) {
-        console.log('direction: LEFT_DIRECTION')
-        snakePosition.x--
-      }
-
-      break
-    }
-    case RIGHT_DIRECTION: {
-      if (snakePosition.x < NUMBER_OF_CELLS_IN_ROW) {
-        console.log('direction: RIGHT_DIRECTION')
-        snakePosition.x++
-      }
-
-      break
-    }
-    case TOP_DIRECTION: {
-      if (snakePosition.y > 0) {
-        console.log('direction: TOP_DIRECTION')
-        snakePosition.y--
-      }
-
-      break
-    }
-    case BOTTOM_DIRECTION: {
-      if (snakePosition.y < NUMBER_OF_CELLS_IN_COLUMN) {
-        console.log('direction: BOTTOM_DIRECTION')
-        snakePosition.y++
-      }
-
-      break
-    }
-  }
-
-  return snakePosition
-}
-
 drawMatrix = () => {
-  currentSnakePosition = calculateNextSnakePosition()
-
-  console.log('index.js currentSnakePosition', currentSnakePosition)
   const currentMatrix = calculateMatrix(currentSnakePosition)
 
   if (canvas.getContext) {
@@ -130,38 +139,32 @@ drawMatrix()
 
 // Initializing document events
 document.addEventListener('keydown', ({keyCode}) => {
-  console.log('index.js keyCode', keyCode)
   switch (keyCode) {
     case 37: {
-      console.log('index.js left')
       clearInterval(gameInterval)
       snakeDirection = LEFT_DIRECTION
       gameInterval = setInterval(drawMatrix, GAME_SPEED)
       break
     }
     case 38: {
-      console.log('index.js top')
       clearInterval(gameInterval)
       snakeDirection = TOP_DIRECTION
       gameInterval = setInterval(drawMatrix, GAME_SPEED)
       break
     }
     case 39: {
-      console.log('index.js right')
       clearInterval(gameInterval)
       snakeDirection = RIGHT_DIRECTION
       gameInterval = setInterval(drawMatrix, GAME_SPEED)
       break
     }
     case 40: {
-      console.log('index.js bottom')
       clearInterval(gameInterval)
       snakeDirection = BOTTOM_DIRECTION
       gameInterval = setInterval(drawMatrix, GAME_SPEED)
       break
     }
     default: {
-      console.log('other')
       break
     }
   }
