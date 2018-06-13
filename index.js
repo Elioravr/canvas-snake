@@ -8,7 +8,7 @@ const START_POSITION_SNAKE = {
   y: Math.floor(NUMBER_OF_CELLS_IN_COLUMN / 2),
 }
 const INITIAL_LENGTH_OF_SNAKE = 5
-const GAME_SPEED = 300
+const GAME_SPEED = 100
 
 const EMPTY_TYPE = 'empty'
 const SNAKE_TYPE = 'snake'
@@ -29,52 +29,67 @@ const COLORS = {
 
 class Snake {
   constructor({x, y}) {
-    this.headPosition = {}
     this.cells = []
     this.headPosition = {x, y}
 
-    for (var index = 0; index < INITIAL_LENGTH_OF_SNAKE; index++) {
+    for (let index = 0; index < INITIAL_LENGTH_OF_SNAKE; index++) {
       this.cells.push({
         x: this.headPosition.x + index,
         y: this.headPosition.y,
         index
       })
     }
+
+    this.reversedCells = [...this.cells].reverse()
   }
 
   calculateNewPositionByDirection(direction) {
-    this.cells.forEach(cell => {
-      switch (direction) {
-        case LEFT_DIRECTION: {
-          if (cell.x > 0) {
-            cell.x--
-          }
-
-          break
-        }
-        case RIGHT_DIRECTION: {
-          if (cell.x < NUMBER_OF_CELLS_IN_ROW) {
-            cell.x++
-          }
-
-          break
-        }
-        case TOP_DIRECTION: {
-          if (cell.y > 0) {
-            cell.y--
-          }
-
-          break
-        }
-        case BOTTOM_DIRECTION: {
-          if (cell.y < NUMBER_OF_CELLS_IN_COLUMN) {
-            cell.y++
-          }
-
-          break
-        }
+    this.reversedCells.forEach(cell => {
+      if (cell.index === 0) {
+        this._calculateNewCellPositionByDirection(cell, direction)
+      } else {
+        this._calculateNewCellPositionByLastCell(cell, direction)
       }
     })
+  }
+
+  _calculateNewCellPositionByLastCell(cell) {
+    const {x, y} = this.cells[cell.index - 1]
+    cell.x = x
+    cell.y = y
+  }
+
+  _calculateNewCellPositionByDirection(cell, direction) {
+    switch (direction) {
+      case LEFT_DIRECTION: {
+        if (cell.x > 0) {
+          cell.x--
+        }
+
+        break
+      }
+      case RIGHT_DIRECTION: {
+        if (cell.x < NUMBER_OF_CELLS_IN_ROW) {
+          cell.x++
+        }
+
+        break
+      }
+      case TOP_DIRECTION: {
+        if (cell.y > 0) {
+          cell.y--
+        }
+
+        break
+      }
+      case BOTTOM_DIRECTION: {
+        if (cell.y < NUMBER_OF_CELLS_IN_COLUMN) {
+          cell.y++
+        }
+
+        break
+      }
+    }
   }
 
   getCells() { return this.cells }
