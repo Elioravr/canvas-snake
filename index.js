@@ -8,7 +8,7 @@ const START_POSITION_SNAKE = {
   y: Math.floor(NUMBER_OF_CELLS_IN_COLUMN / 2),
 }
 const INITIAL_LENGTH_OF_SNAKE = 5
-const GAME_SPEED = 100
+const GAME_SPEED = 50
 
 const EMPTY_TYPE = 'empty'
 const SNAKE_TYPE = 'snake'
@@ -28,11 +28,11 @@ const COLORS = {
 }
 
 class Snake {
-  constructor({x, y}) {
+  constructor({x, y, length}) {
     this.cells = []
     this.headPosition = {x, y}
 
-    for (let index = 0; index < INITIAL_LENGTH_OF_SNAKE; index++) {
+    for (let index = 0; index < length; index++) {
       this.cells.push({
         x: this.headPosition.x + index,
         y: this.headPosition.y,
@@ -40,10 +40,11 @@ class Snake {
       })
     }
 
-    this.reversedCells = [...this.cells].reverse()
+    this.calculateReversedCells()
   }
 
   calculateNewPositionByDirection(direction) {
+    this.direction = direction
     this.reversedCells.forEach(cell => {
       if (cell.index === 0) {
         this._calculateNewCellPositionByDirection(cell, direction)
@@ -92,30 +93,83 @@ class Snake {
     }
   }
 
+  isPositionTouchingSnake({x, y}) {
+    return this.cells.some(cell => {
+      return cell.x === x && cell.y === y
+    })
+
+    return false
+  }
+
+  calculateReversedCells() {
+    this.reversedCells = [...this.cells].reverse()
+  }
+
+  grow() {
+    const lastCell = this.cells[this.cells.length - 1]
+    const newPosition = {x: lastCell.x, y: lastCell.y}
+
+    switch (this.direction) {
+      case LEFT_DIRECTION: {
+        newPosition.x++
+        break
+      }
+      case RIGHT_DIRECTION: {
+        newPosition.x--
+        break
+      }
+      case TOP_DIRECTION: {
+        newPosition.y--
+        break
+      }
+      case BOTTOM_DIRECTION: {
+        newPosition.y++
+        break
+      }
+    }
+
+    this.cells.push({
+      ...newPosition,
+      index: lastCell.index + 1
+    })
+
+    this.calculateReversedCells()
+  }
+
   getCells() { return this.cells }
 }
 
 const canvas = document.getElementById('canvas')
 const currentMatrix = []
 const nextMatrix = []
-const snake = new Snake(START_POSITION_SNAKE)
+const snake = new Snake({...START_POSITION_SNAKE, length: INITIAL_LENGTH_OF_SNAKE})
 let currentSnakePosition = {...START_POSITION_SNAKE}
 const pizzaPosition = {}
 
 let snakeDrawingStarted = false
 let snakeDirection = 'left'
 
-calculatePizzaPoisition = () => {
+repositionPizza = () => {
   pizzaPosition.x = Math.floor(Math.random() * NUMBER_OF_CELLS_IN_ROW)
   pizzaPosition.y = Math.floor(Math.random() * NUMBER_OF_CELLS_IN_COLUMN)
+
+  if (snake.isPositionTouchingSnake(pizzaPosition)) {
+    repositionPizza()
+  }
 }
 
-calculatePizzaPoisition()
+repositionPizza()
+
 calculateMatrix = (snakePosition) => {
   const matrix = []
 
   snake.calculateNewPositionByDirection(snakeDirection)
   const cells = snake.getCells()
+
+  if (snake.isPositionTouchingSnake(pizzaPosition)) {
+    repositionPizza()
+    snake.grow()
+  }
 
   // Initializing matrix
   for (let columnIndex = 0; columnIndex < NUMBER_OF_CELLS_IN_COLUMN; columnIndex++) {
